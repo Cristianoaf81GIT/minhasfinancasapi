@@ -3,6 +3,7 @@ package com.cristiano.service.impl;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cristiano.exception.RegraNegocioException;
 import com.cristiano.model.entity.Lancamento;
 import com.cristiano.model.enums.StatusLancamento;
+import com.cristiano.model.enums.TipoLancamento;
 import com.cristiano.model.repository.LancamentoRepository;
 import com.cristiano.service.LancamentoService;
 
@@ -92,6 +94,33 @@ public class LancamentoServiceImpl implements LancamentoService{
 		
 		if(lancamento.getTipo() == null)
 			throw new RegraNegocioException("Informe um Tipo de lançamento");
+	}
+
+	@Override
+	public Optional<Lancamento> obterPorId(Long id) {
+		return repository.findById(id);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public BigDecimal obterSaldoPorUsuario(Long id) {
+		BigDecimal receitas = repository
+				.obterSaldoPorTipoLancamentoEUsuario(
+						id, TipoLancamento.RECEITA );
+		BigDecimal despesas = repository
+				.obterSaldoPorTipoLancamentoEUsuario(
+						id, TipoLancamento.DESPESA );
+		
+		if ( receitas == null ) {
+			receitas = BigDecimal.ZERO;
+		}
+		
+		if ( despesas == null ) {
+			despesas = BigDecimal.ZERO;
+		}
+			
+		
+		return receitas.subtract( despesas );
 	}
 
 }
