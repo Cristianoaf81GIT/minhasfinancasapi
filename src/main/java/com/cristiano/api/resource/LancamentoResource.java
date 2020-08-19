@@ -25,11 +25,12 @@ import com.cristiano.model.enums.TipoLancamento;
 import com.cristiano.service.LancamentoService;
 import com.cristiano.service.UsuarioService;
 
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/lancamentos")
-@RequiredArgsConstructor
+@RequiredArgsConstructor 
 public class LancamentoResource {
 	
 	private final LancamentoService service;
@@ -51,7 +52,7 @@ public class LancamentoResource {
 		
 		lancamentoFiltro.setAno(ano);
 		
-		if(!tipo.equals(""))
+		if( tipo !=null && !tipo.trim().equals("") )
 			lancamentoFiltro.setTipo(TipoLancamento.valueOf( tipo.toUpperCase() ));
 		
 		Optional<Usuario> usuario = usuarioService.obterPorId(idUsuario);
@@ -69,6 +70,15 @@ public class LancamentoResource {
 		return new ResponseEntity<Object>( lancamentos, HttpStatus.OK );
 	}
 	
+	@GetMapping("{id}")
+	public ResponseEntity<Object> obterLancamento ( @PathVariable ("id") Long id ) {
+		
+		return service
+				.obterPorId( id )
+				.map( lancamento -> new ResponseEntity<Object>(converterParaDTO(lancamento),HttpStatus.OK) )
+				.orElseGet( () ->  new ResponseEntity<Object>("lançamento não encontrado!",HttpStatus.NOT_FOUND));
+		
+	}
 	
 	@PostMapping
 	public ResponseEntity<Object> salvar( @RequestBody LancamentoDTO dto ) {
@@ -225,5 +235,19 @@ public class LancamentoResource {
 		);
 	}
 	
+	
+	private LancamentoDTO converterParaDTO( Lancamento lancamento ) {
+		return LancamentoDTO
+				.builder()
+				.id(lancamento.getId())
+				.descricao(lancamento.getDescricao())
+				.valor(lancamento.getValor())
+				.mes(lancamento.getMes())
+				.ano(lancamento.getAno())
+				.status(lancamento.getStatus().name())
+				.tipo(lancamento.getTipo().name())
+				.usuario(lancamento.getUsuario().getId())
+				.build();
+	}
 	
 }

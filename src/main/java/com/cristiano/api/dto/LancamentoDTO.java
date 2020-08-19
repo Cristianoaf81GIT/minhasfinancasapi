@@ -2,11 +2,15 @@ package com.cristiano.api.dto;
 
 import java.math.BigDecimal;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@Builder
+@Builder 
+@NoArgsConstructor
+@AllArgsConstructor
 public class LancamentoDTO {
 	private Long id;
 	private String descricao;
@@ -16,4 +20,6 @@ public class LancamentoDTO {
 	private Long usuario;
 	private String tipo;
 	private String status;
+
+  
 }
